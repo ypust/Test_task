@@ -6,6 +6,6 @@
 - The program can check the link validity and ask a user for a new one in case the link is broken or incorrect.
 
 - The program check the links on the page and save all valid and invalid links to separate files
-(correct_links.json and broken_links.txt)
+(correct_links.txt and broken_links.txt)
 
 - All the necessary dependencies can be found in requirements.txt and should be previously installed.
