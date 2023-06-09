@@ -8,11 +8,6 @@ import logging
 logging.basicConfig(level=logging.INFO, filename='parser_log.log', filemode='w',
                     format='%(asctime)s %(levelname)s %(message)s')
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--url', type=str, default=None, help='set URL')
-parser.add_argument('--pdf', type=str, default=None, help='set PDF file')
-args = parser.parse_args()
-
 
 class UrlAnalyzer(ABC):
     def __init__(self, links):
@@ -43,11 +38,6 @@ class UrlAnalyzer(ABC):
 
 
 class HtmlUrlAnalyzer(UrlAnalyzer):
-    def __new__(cls, *args, **kwargs):
-        analyzer = super().__new__(cls)
-        if not args and not kwargs:
-            analyzer.url = cls.user_input()
-        return analyzer
 
     def __init__(self, url=None):
         if url:
@@ -71,30 +61,16 @@ class HtmlUrlAnalyzer(UrlAnalyzer):
             logging.error(f'Cannot open the page. Status code:{response.status_code}')
             return []
 
-    @classmethod
-    def user_input(cls):
-        if args.url:
-            return args.url
-        else:
-            return input('Set URL for parsing: ')
-
-    # logging.info(f'URL is set {input()}')
-
 
 class PdfUrlAnalyzer(UrlAnalyzer):
-
-    def __new__(cls, *args, **kwargs):
-        analyzer = super().__new__(cls)
-        if not args and not kwargs:
-            analyzer.file_path = cls.user_input()
-        return analyzer
 
     def __init__(self, file_path=None):
         if file_path:
             self.file_path = file_path
         super().__init__(self.__extract_links_from_file(self.file_path))
 
-    def __extract_links_from_file(self, file_path):
+    @staticmethod
+    def __extract_links_from_file(file_path):
         links = []
         pdf = fitz.open(file_path)
         for page in pdf:
@@ -105,15 +81,13 @@ class PdfUrlAnalyzer(UrlAnalyzer):
         pdf.close()
         return links
 
-    @classmethod
-    def user_input(cls):
-        if args.pdf:
-            return args.pdf
-        else:
-            return input('Set PDF for parsing: ')
-
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--url', type=str, default=None, help='set URL')
+    parser.add_argument('--pdf', type=str, default=None, help='set PDF file')
+    args = parser.parse_args()
+
     if args.url:
         url_analyzer = HtmlUrlAnalyzer(args.url)
         url_analyzer.analyze()
@@ -128,4 +102,3 @@ if __name__ == "__main__":
         else:
             url_analyzer = HtmlUrlAnalyzer(path)
             url_analyzer.analyze()
-
